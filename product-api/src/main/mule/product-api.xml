@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d8811725-8305-40db-b72e-497ea6bd86d9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b97efc6f-55ba-41fc-9730-4a06fdfd2b99" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" database="order_management_db" />
+	</db:config>
+	<flow name="product-apiFlow" doc:id="8306188f-0dc4-4fa0-8a43-b5885994c279" >
+		<http:listener doc:name="Listener" doc:id="8edf3b34-4d68-407c-977f-44266b09036d" path="/products/{productId}" config-ref="HTTP_Listener_config"/>
+		<db:select doc:name="Select" doc:id="fb967870-5b70-4636-90f8-b57b1f4d3fa0" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT productId, name, price, stock
+FROM products
+WHERE productId = :productId]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+    productId: attributes.uriParams.productId
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="805fe9d1-fff2-4299-bf80-cd3c5f157612">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+if (isEmpty(payload))
+    {
+        status: 404,
+        message: "Product not found"
+    }
+else
+    {
+        productId: payload[0].productId,
+        name: payload[0].name,
+        price: payload[0].price,
+        stock: payload[0].stock
+    }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
