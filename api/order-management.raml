@@ -1,0 +1,165 @@
+#%RAML 1.0
+
+title: Order Management API
+version: v1
+baseUri: /api
+
+types:
+
+  Item:
+    type: object
+    properties:
+      productId:
+        type: string
+        required: true
+      quantity:
+        type: number
+        required: true
+        minimum: 1
+
+  OrderRequest:
+    type: object
+    properties:
+      customerId:
+        type: string
+        required: true
+      customerName:
+        type: string
+        required: true
+      email:
+        type: string
+        required: true
+      items:
+        type: array
+        items: Item
+        required: true
+        minItems: 1
+
+  OrderResponse:
+    type: object
+    properties:
+      orderId:
+        type: string
+        required: true
+      customerId:
+        type: string
+        required: true
+      subtotal:
+        type: number
+        required: true
+      discount:
+        type: number
+        required: true
+      totalAmount:
+        type: number
+        required: true
+      status:
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+
+  ErrorResponse:
+    type: object
+    properties:
+      status:
+        type: number
+        required: true
+      message:
+        type: string
+        required: true
+
+/orders:
+
+  post:
+    description: |
+      Creates and processes a customer order.
+      The Main MuleSoft application retrieves product information,
+      checks stock, calculates the subtotal, applies a 10% discount
+      when subtotal is greater than 10000, creates the order,
+      sends a notification, and returns the final order response.
+
+    body:
+      application/json:
+        type: OrderRequest
+        example:
+          customerId: "CUST001"
+          customerName: "Dilshan"
+          email: "dilshan@example.com"
+          items:
+            - productId: "P001"
+              quantity: 2
+
+    responses:
+
+      201:
+        description: Order created successfully
+        body:
+          application/json:
+            type: OrderResponse
+            examples:
+              successWithDiscount:
+                value:
+                  orderId: "ORD1001"
+                  customerId: "CUST001"
+                  subtotal: 12000
+                  discount: 1200
+                  totalAmount: 10800
+                  status: "CONFIRMED"
+                  message: "Order placed successfully"
+
+              successWithoutDiscount:
+                value:
+                  orderId: "ORD1002"
+                  customerId: "CUST002"
+                  subtotal: 9000
+                  discount: 0
+                  totalAmount: 9000
+                  status: "CONFIRMED"
+                  message: "Order placed successfully"
+
+      400:
+        description: Invalid order request
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              status: 400
+              message: "Invalid order request"
+
+      404:
+        description: Product not found
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              status: 404
+              message: "Product not found"
+
+      409:
+        description: Insufficient stock
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              status: 409
+              message: "Insufficient stock"
+
+      502:
+        description: External service unavailable
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              status: 502
+              message: "External service unavailable"
+
+      500:
+        description: Internal server error
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              status: 500
+              message: "Internal server error"
