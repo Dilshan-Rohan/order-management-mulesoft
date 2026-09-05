@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="notification-api-config" doc:name="HTTP Listener config" doc:id="3d06eae1-5dcc-4082-8b34-4bace990c7bc" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<flow name="notification-apiFlow" doc:id="dc31590b-808f-4e8b-9f79-625243a2627a" >
+		<http:listener doc:name="Listener" doc:id="7b3bd128-b358-4044-9ff9-6da4827b5e9a" config-ref="notification-api-config" path="/notifications" allowedMethods="POST"/>
+		<logger level="INFO" doc:name="Logger" doc:id="8ffd05b3-20dd-4256-97f8-4f85f33201ca" message='#["Notification received"]'/>
+		<choice doc:name="" doc:id="a388dd10-c92b-4031-8ce7-449827a0d947" >
+			<when expression='#[payload.email == "failure@example.com"]'>
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;    status: 500,&#10;    message: "Notification failed"&#10;}]' doc:name="Set Payload" doc:id="1b6ee35f-e913-4447-bebf-22f4ae02fbbb" />
+				<set-variable value="500" doc:name="Set Variable" doc:id="b2aa9bac-793a-4a44-bc91-1fadad067706" variableName="httpStatus"/>
+			</when>
+			<otherwise>
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;    status: "SENT",&#10;    message: "Notification sent successfully"&#10;}]' doc:name="Set Payload" doc:id="f92c5bad-be1e-4994-aade-99afe3f2c396" />
+				<set-variable value="200" doc:name="Set Variable" doc:id="17bbb6c9-55c2-44e5-9bc7-be3c8885e24a" variableName="httpStatus"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="edecbdd7-6c4b-4096-a928-69f57ebb959c" message="#[vars.httpStatus]"/>
+	</flow>
+</mule>
