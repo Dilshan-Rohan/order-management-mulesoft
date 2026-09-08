@@ -18,3 +18,10 @@ Thumbs.db
 
 # IDE temporary files
 .vscode/
+
+# Anypoint Studio tooling/cache
+.tooling/
+.tooling-apps-cache/
+
+# Old project backup
+main-order-api-old/
