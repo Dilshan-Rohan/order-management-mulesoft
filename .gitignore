@@ -1,0 +1,13 @@
+# MuleSoft generated files
+target/
+.mule/
+
+# Anypoint Studio / Eclipse
+.metadata/
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+Thumbs.db
