@@ -1,0 +1,29 @@
+{
+  "configs": [
+    "order-system-api1.xml"
+  ],
+  "secureProperties": [],
+  "supportedJavaVersions": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:order-system-api1:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.12.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "log4j2.xml",
+        "order-system-api1.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  },
+  "javaSpecificationVersions": [
+    "17"
+  ]
+}
